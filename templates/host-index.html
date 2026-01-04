@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="../static/styles.css">
+    <script src="../static/script.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+
+  </head>
+  <body>
+
+    <div class="container-fluid scoreboard-sticky" id="sticky-header">
+      <div class="row text-center align-items-center gx-1">
+        <div class="col-5">
+          <div class="team-name text-team-red" id="label-team-left">Red</div>
+          <div class="score-display text-team-red" id="score-left">0</div>
+        </div>
+        
+        <div class="col-2">
+          <button id="btn-unlock-config" class="btn btn-sm btn-outline-secondary d-none mb-1 border-0">
+            <i class="fas fa-lock"></i>
+          </button>
+          <div class="small text-muted" style="font-size: 0.7rem;" id="current-date-display"></div>
+        </div>
+        
+        <div class="col-5">
+          <div class="team-name text-team-black" id="label-team-right">Black</div>
+          <div class="score-display text-team-black" id="score-right">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container mt-3">
+      
+      <div id="config-panel" class="config-section shadow-sm">
+        <h6 class="border-bottom pb-2 mb-3 text-muted">Game Setup</h6>
+        
+        <div class="mb-3">
+          <label class="form-label small">Date</label>
+          <input type="date" id="game-date" class="form-control">
+        </div>
+
+        <div class="row g-2">
+          <div class="col-6">
+             <label class="form-label small text-team-red">Team Red</label>
+             <button class="btn btn-outline-danger w-100 text-start text-truncate" onclick="openPlayerModal('left')">
+               <span id="display-names-left">Select...</span>
+             </button>
+          </div>
+          <div class="col-6">
+             <label class="form-label small text-team-black">Team Black</label>
+             <button class="btn btn-outline-dark w-100 text-start text-truncate" onclick="openPlayerModal('right')">
+               <span id="display-names-right">Select...</span>
+             </button>
+          </div>
+        </div>
+
+        <div class="text-center mt-4">
+          <button id="btn-start-game" class="btn btn-primary btn-lg w-100 fw-bold" disabled>Start Game</button>
+        </div>
+      </div>
+
+      <div id="game-rows-container" class="mt-4"></div>
+
+      <div id="finish-game-area" class="fixed-bottom p-3 bg-white border-top shadow-lg d-none" style="z-index: 1030;">
+        <button id="btn-upload" class="btn btn-success btn-lg w-100 fw-bold" onclick="uploadGameData()">
+          <i class="fas fa-cloud-upload-alt me-2"></i> Upload Game Result
+        </button>
+      </div>
+
+    </div>
+
+    <div class="modal fade" id="playerModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Select Players</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="input-group mb-3">
+              <input type="text" id="new-player-name" class="form-control" placeholder="Add new name...">
+              <button class="btn btn-outline-secondary" onclick="addNewPlayer()">Add</button>
+            </div>
+            <div id="player-checkbox-list" class="list-group" style="max-height: 200px; overflow-y: auto;"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" onclick="savePlayerSelection()">Done</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="scoringModal" data-bs-backdrop="static" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Result</h5>
+          </div>
+          <div class="modal-body text-center">
+            <p id="scoring-instruction-text" class="lead mb-4">How many tricks were taken?</p>
+            <div id="trick-selector-container" class="d-flex flex-wrap justify-content-center gap-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  </body>
+</html>
