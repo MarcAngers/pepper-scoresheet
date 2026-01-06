@@ -10,14 +10,14 @@
       .text-team-red { color: #d63384; font-weight: bold; } 
       .text-team-black { color: #212529; font-weight: bold; }
       
-      /* Updated Borders: 1px all around + 5px on specific side */
+      /* Updated Borders: 2px solid all around + 8px on specific side */
       .row-border-red { 
-        border: 1px solid #d63384 !important; 
-        border-left-width: 5px !important; 
+        border: 2px solid #d63384 !important; 
+        border-left-width: 8px !important; 
       }
       .row-border-black { 
-        border: 1px solid #212529 !important; 
-        border-right-width: 5px !important; 
+        border: 2px solid #212529 !important; 
+        border-right-width: 8px !important; 
       }
 
       .badge-red { background-color: #d63384; color: white; }
@@ -55,14 +55,19 @@
         transition: background-color 0.3s ease;
       }
       
-      .row-locked { pointer-events: none; }
+      /* LOCKED ROWS ARE NOW CLICKABLE */
+      .row-locked { 
+        cursor: pointer; 
+      }
+      .row-locked:hover {
+        opacity: 0.9;
+      }
 
       /* --- RESULT BACKGROUND STYLES --- */
       .row-result-made {
         background-color: #e8f5e9 !important; 
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23c8e6c9' d='M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
-        background-position: center center;
         background-size: auto 90%; 
       }
 
@@ -70,9 +75,15 @@
         background-color: #e2e6ea !important; 
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'%3E%3Cpath fill='%23ced4da' d='M207.6 256l107.72-107.72c6.23-6.23 6.23-16.34 0-22.58l-25.03-25.03c-6.23-6.23-16.34-6.23-22.58 0L160 208.4 52.28 100.68c-6.23-6.23-16.34-6.23-22.58 0L4.68 125.7c-6.23 6.23-6.23 16.34 0 22.58L112.4 256 4.68 363.72c-6.23 6.23-6.23 16.34 0 22.58l25.03 25.03c6.23 6.23 16.34 6.23 22.58 0L160 303.6l107.72 107.72c6.23 6.23 16.34 6.23 22.58 0l25.03-25.03c6.23-6.23 6.23-16.34 0-22.58L207.6 256z'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
-        background-position: center center;
         background-size: auto 80%; 
       }
+
+      /* Dynamic Icon Positioning */
+      .row-border-red.row-result-made, 
+      .row-border-red.row-result-scuppled { background-position: left center; }
+
+      .row-border-black.row-result-made, 
+      .row-border-black.row-result-scuppled { background-position: right center; }
       
       /* Center Inputs */
       .form-select { text-align: center; text-align-last: center; font-weight: 500; font-size: 0.9rem; padding-right: 30px; padding-left: 5px;}
@@ -94,6 +105,40 @@
         font-weight: bold;
         white-space: nowrap;
       }
+      
+      /* DEALER BADGE (Top Right) - Updated to White/Black */
+      .dealer-badge {
+        position: absolute;
+        top: -12px; 
+        right: 15px;
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 12px;
+        background-color: #ffffff; /* White background */
+        color: #212529; /* Dark text */
+        border: 1px solid #ced4da; /* Subtle border for visibility */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        z-index: 10;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      
+      .dealer-select {
+        border: none;
+        background: transparent;
+        color: #212529; /* Dark text */
+        font-size: 0.75rem;
+        font-weight: bold;
+        outline: none;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        max-width: 80px;
+      }
+      
+      .dealer-select option { color: black; }
       
       .locked-text { font-weight: bold; font-size: 1.1rem; display: block; padding-top: 5px; position: relative; z-index: 2;}
       
