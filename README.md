@@ -61,7 +61,7 @@ Finish: Once a team crosses 50 points and has "Agency" (made the bid or scuppled
 
 Upload: Clicking upload sends the data to Google Sheet, updates the leaderboard, and clears the local save.
 
-<h3>🚀 Installation & Setup</h3>
+<h3>🚀 Installation & Setup 🚀</h3>
 <b>Google Sheet Setup</b>
 Create a new Google Sheet.
 
