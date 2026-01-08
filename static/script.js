@@ -1,9 +1,11 @@
-let allPlayers = [];
+const STORAGE_KEY = 'pepper_game_v1';
+      let allPlayers = [];
       let teamLeft = []; // Red
       let teamRight = []; // Black
       let editingSide = ''; 
       let rowCount = 0;
       let gameLocked = false;
+      let savedGameData = null; // Holds parsed local storage
       
       let currentRowId = null;
       let currentScoringType = ''; 
@@ -20,16 +22,117 @@ let allPlayers = [];
         
         $('#btn-start-game').click(function() {
           if(!validateTeams()) return;
+          // Starting a NEW game means we should clear old storage
+          localStorage.removeItem(STORAGE_KEY);
           lockConfig();
           addGameRow();
+          saveState(); // Initialize save
         });
 
         $('#btn-unlock-config').click(unlockConfig);
+
+        // CHECK FOR SAVED GAME
+        checkForSavedGame();
       });
 
       function updateDateDisplay() {
         const dateVal = new Date($('#game-date').val());
         $('#current-date-display').text(dateVal.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+      }
+
+      // --- LOCAL STORAGE LOGIC ---
+      function checkForSavedGame() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            try {
+                savedGameData = JSON.parse(raw);
+                if (savedGameData && savedGameData.rows && savedGameData.rows.length > 0) {
+                    $('#resume-date').text(savedGameData.date || 'Unknown Date');
+                    new bootstrap.Modal('#resumeModal').show();
+                }
+            } catch (e) {
+                console.error("Save file corrupt", e);
+                localStorage.removeItem(STORAGE_KEY);
+            }
+        }
+      }
+
+      function resumeSavedGame() {
+        bootstrap.Modal.getInstance('#resumeModal').hide();
+        
+        if (!savedGameData) return;
+
+        // Restore Teams & Config
+        $('#game-date').val(savedGameData.date);
+        updateDateDisplay();
+        teamLeft = savedGameData.teams.red;
+        teamRight = savedGameData.teams.black;
+        
+        $('#display-names-left').text(teamLeft.join(', '));
+        $('#label-team-left').text(teamLeft.length > 0 ? teamLeft.join('/') : 'Red');
+        $('#display-names-right').text(teamRight.join(', '));
+        $('#label-team-right').text(teamRight.length > 0 ? teamRight.join('/') : 'Black');
+        
+        lockConfig();
+
+        // Restore Rows
+        savedGameData.rows.forEach(r => {
+            // Add row to DOM
+            addGameRow(); // Adds empty row and increments rowCount
+            
+            // Get the ID of the just-added row
+            const rowId = `row-${rowCount}`;
+            const row = $(`#${rowId}`);
+            
+            // Populate Fields
+            row.find('.bid-val').val(r.bidVal);
+            row.find('.bid-suit').val(r.bidSuit);
+            row.find('.bid-player').val(r.bidPlayer);
+            row.find('.dealer-select').val(r.dealer); // Restore dealer selection
+            
+            // Update Visuals based on loaded values
+            updateRowVisuals(rowId);
+            
+            // If row was finished, set result and lock
+            if (r.resType) {
+                currentRowId = rowId;
+                currentScoringType = r.resType;
+                finalizeScore(r.resTricks);
+            }
+        });
+        
+        // Final recalc to ensure all texts/badges are correct
+        recalcDealers(); // Re-run dealer text/dropdown logic
+        updateAllScores();
+      }
+
+      function clearSaveAndReset() {
+        localStorage.removeItem(STORAGE_KEY);
+        bootstrap.Modal.getInstance('#resumeModal').hide();
+      }
+
+      function saveState() {
+        // Build the state object
+        const rows = [];
+        $('.game-row').each(function() {
+            const row = $(this);
+            rows.push({
+                bidVal: row.find('.bid-val').val(),
+                bidSuit: row.find('.bid-suit').val(),
+                bidPlayer: row.find('.bid-player').val(),
+                dealer: row.find('.dealer-select').val(), // Save raw val even if hidden
+                resTricks: row.find('.res-tricks').val(),
+                resType: row.find('.res-type').val()
+            });
+        });
+
+        const state = {
+            date: $('#game-date').val(),
+            teams: { red: teamLeft, black: teamRight },
+            rows: rows
+        };
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       }
 
       // --- PLAYER & CONFIG LOGIC ---
@@ -99,6 +202,7 @@ let allPlayers = [];
 
       function unlockConfig() {
         if(rowCount > 0 && !confirm("Reset game?")) return;
+        localStorage.removeItem(STORAGE_KEY); // Clear save if resetting
         location.reload();
       }
 
@@ -120,7 +224,7 @@ let allPlayers = [];
             
             <div class="dealer-badge">
                 <span>D:</span>
-                <select class="dealer-select" onchange="recalcDealers()">
+                <select class="dealer-select" onchange="recalcDealers(); saveState();">
                    </select>
                 <span class="dealer-text d-none"></span>
             </div>
@@ -128,7 +232,7 @@ let allPlayers = [];
             <div class="row g-2 align-items-center text-center">
               <div class="col-4">
                 <label class="small text-muted d-block">Bid</label>
-                <select class="form-select form-select-sm bid-val" onchange="updateRowVisuals('${rowId}')">
+                <select class="form-select form-select-sm bid-val" onchange="updateRowVisuals('${rowId}'); saveState();">
                   <option value="" selected disabled>-</option>
                   <option value="3">3</option>
                   <option value="4">4</option>
@@ -143,7 +247,7 @@ let allPlayers = [];
               </div>
               <div class="col-4">
                 <label class="small text-muted d-block">Suit</label>
-                <select class="form-select form-select-sm bid-suit" onchange="updateRowVisuals('${rowId}')">
+                <select class="form-select form-select-sm bid-suit" onchange="updateRowVisuals('${rowId}'); saveState();">
                   <option value="" selected disabled>-</option>
                   <option value="Spades">&#9824; Spades</option>
                   <option value="Hearts">&#9829; Hearts</option>
@@ -156,7 +260,7 @@ let allPlayers = [];
               </div>
               <div class="col-4">
                 <label class="small text-muted d-block">Player</label>
-                <select class="form-select form-select-sm bid-player" onchange="updateRowVisuals('${rowId}')">
+                <select class="form-select form-select-sm bid-player" onchange="updateRowVisuals('${rowId}'); saveState();">
                   <option value="" selected disabled>-</option>
                   ${bidderOptions}
                 </select>
@@ -192,8 +296,8 @@ let allPlayers = [];
         
         $('#game-rows-container').append(html);
         
-        // RECALCULATE DEALER LOGIC
         recalcDealers();
+        saveState(); // Save after adding new row
         
         document.getElementById(rowId).scrollIntoView({behavior: "smooth", block: "center"});
       }
@@ -204,7 +308,6 @@ let allPlayers = [];
         const totalPlayers = teamLeft.length + teamRight.length;
         const is6Player = (totalPlayers === 6);
         
-        // Arrays to store the ORDER in which team members deal
         let redOrder = [];
         let blackOrder = [];
         
@@ -285,6 +388,8 @@ let allPlayers = [];
                 
                 select.addClass('d-none');
                 textSpan.removeClass('d-none').text(autoDealer);
+                // Invisibly set value so saveState captures auto-dealers too (optional, but good for restoring)
+                select.val(autoDealer); 
              }
         });
       }
@@ -307,7 +412,8 @@ let allPlayers = [];
         $(`#${rowId}-actions`).removeClass('d-none');
         
         row.find('.res-type').val(''); 
-        updateAllScores(); 
+        updateAllScores();
+        saveState(); // Save state (row unlocked) 
       }
 
       function updateRowVisuals(rowId) {
@@ -414,6 +520,7 @@ let allPlayers = [];
         row.find('.bid-player-text').html(player).removeClass('d-none');
 
         updateAllScores();
+        saveState(); // Save state (row finalized)
       }
 
       function updateAllScores() {
@@ -534,5 +641,7 @@ let allPlayers = [];
         google.script.run.withSuccessHandler(function(res) {
           alert(res);
           btn.text('Uploaded!');
+          // Clear save on success
+          localStorage.removeItem(STORAGE_KEY);
         }).saveGameData(JSON.stringify(finalData));
       }
