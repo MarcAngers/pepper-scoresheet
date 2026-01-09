@@ -427,7 +427,7 @@ const STORAGE_KEY = 'pepper_game_v1';
         let allowLadies = false;
         
         if (["6", "7", "8", "Small Pepper", "Big Pepper"].includes(bidVal)) allowNT = true;
-        if (["8", "Small Pepper", "Big Pepper"].includes(bidVal)) allowLadies = true;
+        if (["7", "8", "Small Pepper", "Big Pepper"].includes(bidVal)) allowLadies = true;
         
         const optNT = suitSelect.find('option[value="No Trump"]');
         const optLadies = suitSelect.find('option[value="Ladies"]');
@@ -547,15 +547,11 @@ const STORAGE_KEY = 'pepper_game_v1';
             let leftPoints = 0;
             let rightPoints = 0;
             
-            const isLadiesBid = (bidVal === "8" && suitVal === "Ladies");
-
             if (resType === 'made') {
               if (bidVal === "Small Pepper") {
                 isTeamLeft ? leftPoints = 12 : rightPoints = 12;
               } else if (bidVal === "Big Pepper") {
                 isTeamLeft ? leftPoints = 24 : rightPoints = 24;
-              } else if (isLadiesBid) {
-                isTeamLeft ? leftPoints = 10 : rightPoints = 10;
               } else {
                 const pointsForBidder = tricks;
                 const pointsForOpponent = 8 - tricks;
@@ -566,7 +562,6 @@ const STORAGE_KEY = 'pepper_game_v1';
               let penalty = 0;
               if (bidVal === "Small Pepper") penalty = 12;
               else if (bidVal === "Big Pepper") penalty = 24;
-              else if (isLadiesBid) penalty = 10;
               else penalty = parseInt(bidVal);
               
               if(isTeamLeft) leftPoints = -penalty; else rightPoints = -penalty;
