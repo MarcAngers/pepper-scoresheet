@@ -99,4 +99,4 @@ MasterStats: The leaderboard. One row per player containing cumulative stats.
 
 Relationships: A lookup table tracking every unique pair of players (Partners and Opponents).
 
-Player Profile: (User Created) A dashboard using VLOOKUP and LET formulas to display data from the other tabs.
+Player Profile: (User Created) A dashboard using VLOOKUP and LET formulas to display data from the other tabs..
