@@ -526,6 +526,8 @@ const STORAGE_KEY = 'pepper_game_v1';
       function updateAllScores() {
         let redTotal = 0;
         let blackTotal = 0;
+        let redTeamHadAgency = false;
+        let blackTeamHadAgency = false;
         let gameIsOver = false;
 
         $('.game-row').each(function() {
@@ -543,11 +545,14 @@ const STORAGE_KEY = 'pepper_game_v1';
             const suitVal = row.find('.bid-suit').val();
             const player = row.find('.bid-player').val();
             const isTeamLeft = teamLeft.includes(player);
-
+            
             let leftPoints = 0;
             let rightPoints = 0;
             
             if (resType === 'made') {
+              redTeamHadAgency = isTeamLeft;
+              blackTeamHadAgency = !isTeamLeft;
+
               if (bidVal === "Small Pepper") {
                 isTeamLeft ? leftPoints = 12 : rightPoints = 12;
               } else if (bidVal === "Big Pepper") {
@@ -559,6 +564,9 @@ const STORAGE_KEY = 'pepper_game_v1';
                 else { rightPoints = pointsForBidder; leftPoints = pointsForOpponent; }
               }
             } else { // Scuppled
+              redTeamHadAgency = !isTeamLeft;
+              blackTeamHadAgency = isTeamLeft;
+
               let penalty = 0;
               if (bidVal === "Small Pepper") penalty = 12;
               else if (bidVal === "Big Pepper") penalty = 24;
@@ -585,10 +593,10 @@ const STORAGE_KEY = 'pepper_game_v1';
         $('#score-right').removeClass('winner-circle');
         $('#finish-game-area').addClass('d-none');
 
-        if (redTotal >= 50 || blackTotal >= 50) {
+        if ((redTotal >= 50 && redTeamHadAgency) || (blackTotal >= 50 && blackTeamHadAgency)) {
             gameIsOver = true;
-            if (redTotal >= 50 && redTotal > blackTotal) $('#score-left').addClass('winner-circle');
-            else if (blackTotal >= 50) $('#score-right').addClass('winner-circle');
+            if (redTeamHadAgency) $('#score-left').addClass('winner-circle');
+            else if (blackTeamHadAgency) $('#score-right').addClass('winner-circle');
             
             $('#finish-game-area').removeClass('d-none');
         } else {
