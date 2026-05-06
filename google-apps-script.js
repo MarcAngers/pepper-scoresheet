@@ -1,13 +1,55 @@
 // This is the script running on the google app for this project
 // It is copied here for git history only, it does not serve any funtion here.
 
-// --- HTML SERVING ---
-function doGet() {
+// --- HTML SERVING & EXTERNAL API ---
+// doGet handles two cases:
+//   1. ?action=getPlayers  → returns JSON list of player names (used by Pepper Online)
+//   2. (no action)         → serves the in-page scorekeeper UI (existing behavior)
+function doGet(e) {
+  const action = e && e.parameter ? e.parameter.action : null;
+
+  if (action === 'getPlayers') {
+    const players = getPlayersFromSheet();
+    return ContentService
+      .createTextOutput(JSON.stringify(players))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (action === 'addPlayer') {
+    const name = (e.parameter.name || '').trim();
+    if (!name) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ ok: false, error: 'name is required' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    const existing = getPlayersFromSheet();
+    if (!existing.includes(name)) addNewPlayerToSheet(name);
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: true, added: !existing.includes(name) }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
   return HtmlService.createTemplateFromFile('index')
       .evaluate()
       .setTitle('Pepper Scorekeeper')
       .addMetaTag('viewport', 'width=device-width, initial-scale=1')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+// doPost accepts a finished-game JSON payload (same shape as the in-page upload).
+// Used by Pepper Online to push completed games into the same sheet.
+function doPost(e) {
+  try {
+    const body = e.postData && e.postData.contents ? e.postData.contents : '';
+    const message = saveGameData(body);
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: true, message: message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 function include(filename) {
